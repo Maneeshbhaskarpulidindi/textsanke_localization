@@ -1,0 +1,1 @@
+python train_textsnake_mod.py hybrid_instance_seg --dataset custom --data_root "/home/frinksserver/Maneesh/text_sanke/dummy 1/dummy" --num_workers 4 --batch_size 8 --max_epoch 400  --save_freq 5 --display_freq 10 --viz_freq 20 --log_freq 20 --val_freq 20 --viz
