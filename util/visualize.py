@@ -98,12 +98,41 @@ def _normalize_for_polylines(contours):
         draw_contours.append(c)
     return draw_contours
 
-def visualize_detection_mod(image, contours, tr=None, tcl=None):
+def visualize_detection_mod(image, contours, tr=None, tcl=None, tcl_lines=None, sin_map=None, cos_map=None):
     image_show = _to_hwc_bgr_uint8(image)
 
     draw_contours = _normalize_for_polylines(contours)
     if draw_contours:
         cv2.polylines(image_show, draw_contours, True, (0, 0, 255), 3, lineType=cv2.LINE_AA)
+
+    # Draw arrows on the image
+    if tcl_lines is not None and sin_map is not None and cos_map is not None:
+        H, W = sin_map.shape
+        H_img, W_img = image_show.shape[:2]
+
+        for line in tcl_lines:
+            # Sample points along the center line (e.g., every 10 points)
+            for i in range(0, len(line), 10):
+                x, y = line[i]
+                
+                # Ensure coordinates are within bounds
+                ix, iy = int(x), int(y)
+                if ix >= 0 and ix < W and iy >= 0 and iy < H:
+                    # Get the sin and cos values from the maps
+                    sin_val = sin_map[iy, ix]
+                    cos_val = cos_map[iy, ix]
+                    
+                    # Scale the coordinates to the image size
+                    x_img = int(x * W_img / W)
+                    y_img = int(y * H_img / H)
+                    
+                    # Calculate the end point of the arrow vector
+                    # Arrow length is proportional to the image size or constant
+                    arrow_length = 20
+                    end_x = int(x_img + cos_val * arrow_length)
+                    end_y = int(y_img + sin_val * arrow_length)
+                    
+                    cv2.arrowedLine(image_show, (x_img, y_img), (end_x, end_y), (0, 255, 0), 2, tipLength=0.3)
 
     if (tr is not None) and (tcl is not None):
         tr_bin = (tr > cfg.tr_thresh).astype(np.uint8) * 255

@@ -54,12 +54,17 @@ def inference(detector, image_path, output_dir, transform):
         cont_rs[:, 1] = cont_rs[:, 1] * (H_img / H_pad)
         contours_rescaled.append(cont_rs)
 
+    # Extract sin, cos maps and TCL lines
+    sin_map = output['sin']
+    cos_map = output['cos']
+    tcl_lines = output['tcl_lines']
+
     # End of processing time
     total_end = time.time()
     total_time = total_end - total_start
     
     # Visualize
-    pred_vis = visualize_detection_mod(img_show, contours_rescaled)
+    pred_vis = visualize_detection_mod(img_show, contours_rescaled, tcl_lines=tcl_lines, sin_map=sin_map, cos_map=cos_map)
 
     # Add timings to the image
     total_time_text = f"Total time: {total_time:.4f}s"
